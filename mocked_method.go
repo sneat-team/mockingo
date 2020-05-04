@@ -4,15 +4,6 @@ import (
 	"fmt"
 )
 
-type Argument struct {
-	Name  string
-	Value interface{}
-}
-
-type MethodCall struct {
-	Args map[string]interface{}
-}
-
 type MockedMethod struct {
 	name  string
 	calls []MethodCall
@@ -23,15 +14,17 @@ func (v *MockedMethod) Name() string {
 }
 
 func (v *MockedMethod) Called(args ...Argument) {
-	var methodCall = MethodCall{Args: make(map[string]interface{}, len(args))}
+	var methodCall = MethodCall{args: make(map[string]interface{}, len(args))}
 	for _, arg := range args {
-		methodCall.Args[arg.Name] = arg.Value
+		methodCall.args[arg.name] = arg.Value
 	}
 	v.calls = append(v.calls, methodCall)
 }
 
 func (v *MockedMethod) Calls() []MethodCall {
-	return v.calls[:]
+	calls := make([]MethodCall, len(v.calls))
+	copy(calls, v.calls)
+	return calls
 }
 
 func NewMockedMethod(name string) *MockedMethod {
