@@ -42,7 +42,7 @@ func TestMockedFunc_Calls(t *testing.T) {
 		NewArgument("a1", 11),
 		NewArgument("a2", 22),
 	)
-	
+
 	if n := len(mockedFunc.calls); n != 2 {
 		t.Errorf("expected to have 2 calls, got: %v", n)
 	}
