@@ -44,23 +44,28 @@ import (
 
 func TestMyFunc(t *testing.T) {
   
-  // mock helper to store history of calls with passed arguments
-  mockedSomeFunc = mockingo.NewMockedFunc(t, "someFunc")
+  // Create mock helper to store history of calls with passed arguments.
+  // Parameter `t *testing.T` is needed to call `t.Helper()` inside to improve call stack reporting.
+  // This reduces boilerplate code in your unit tests.
+  mockedSomeFunc = mockingo.NewMockedFunc(t, "someFunc") // Name argument is used in error output if asserts are failing
   
-  // replace pointer to our dependency with a mock that uses  helper to store information about call
+  // replace pointer to our dependency with a mock that uses helper to store information about call
   someFunc = func(a, b string) string {
     mockedSomeFunc.Called(mockingo.NewArgument("a", a), mockingo.NewArgument("b", b))
     return a + b
   }
   
-  const expectedResult = "A1B1A2B2A3B3"
-    
-  const numberOfCalls = 3
+  const (
+    expectedResult = "A1B1A2B2A3B3"
+    numberOfCalls = 3 // The 3d argument to `MyFunc()`
+  )
+
   // Call to function we test and assert it result 
   if result := MyFunc("A", "B", numberOfCalls); result != expectedResult {
     t.Errorf("Expected result is '%v', actual result is '%v'", expectedResult, result)
   }
   
+  // Because we passed `t *testing.T` to the `NewMockedFunc()` it will report problem line propery
   mockedSomeFunc.AssertCalledAtLeastOnce(true) // True means is fatal if condition is not met
   mockedSomeFunc.AssertCalledExactly(numberOfCalls) // Verify our dependency was called expected number of times
   
