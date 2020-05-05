@@ -25,7 +25,7 @@ func (v *MockedFunc) Called(args ...Argument) {
 	v.calls = append(v.calls, methodCall)
 }
 
-// Returns all calls made to a mocked func
+// Calls returns all calls made to a mocked func
 func (v *MockedFunc) Calls() []MethodCall {
 	calls := make([]MethodCall, len(v.calls))
 	copy(calls, v.calls)
@@ -50,7 +50,7 @@ func (v *MockedFunc) AssertCalledExactly(expected int, fatal ...bool) {
 	}
 }
 
-// AssertCalledExactly verifies at least 1 call have been made to the mocked func
+// AssertCalledAtLeastOnce verifies at least 1 call have been made to the mocked func
 func (v *MockedFunc) AssertCalledAtLeastOnce(fatal ...bool) {
 	if n := len(v.calls); n == 0 {
 		v.t.Helper()
