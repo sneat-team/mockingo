@@ -1,10 +1,11 @@
 package mockingo
 
 import (
-	"fmt"
+	"testing"
 )
 
 type MockedFunc struct {
+	t     *testing.T
 	name  string
 	calls []MethodCall
 }
@@ -16,7 +17,7 @@ func (v *MockedFunc) Name() string {
 func (v *MockedFunc) Called(args ...Argument) {
 	var methodCall = MethodCall{args: make(map[string]interface{}, len(args))}
 	for _, arg := range args {
-		methodCall.args[arg.name] = arg.Value
+		methodCall.args[arg.name] = arg.value
 	}
 	v.calls = append(v.calls, methodCall)
 }
@@ -27,20 +28,30 @@ func (v *MockedFunc) Calls() []MethodCall {
 	return calls
 }
 
-func NewMockedMethod(name string) *MockedFunc {
-	return &MockedFunc{name: name}
+func NewMockedFunc(t *testing.T, name string) *MockedFunc {
+	return &MockedFunc{t: t, name: name}
 }
 
-func (v *MockedFunc) AssertCalledExactly(expected int) string {
+func (v *MockedFunc) AssertCalledExactly(expected int, fatal ...bool) {
 	if n := len(v.calls); n != expected {
-		return fmt.Sprintf("expected to get %v calls to %v(), got: %v", expected, v.name, n)
+		v.t.Helper()
+		const m = "expected to get %v calls to %v(), got: %v"
+		if len(fatal) > 0 && fatal[0] {
+			v.t.Fatalf(m, expected, v.name, n)
+		} else {
+			v.t.Errorf(m, expected, v.name, n)
+		}
 	}
-	return ""
 }
 
-func (v *MockedFunc) AssertCalledAtLeastOnce() string {
+func (v *MockedFunc) AssertCalledAtLeastOnce(fatal ...bool) {
 	if n := len(v.calls); n == 0 {
-		return fmt.Sprintf("expected to get at least 1 call to %v(), got none", v.name)
+		v.t.Helper()
+		const m = "expected to get at least 1 call to %v(), got none"
+		if len(fatal) > 0 && fatal[0] {
+			v.t.Fatalf(m, v.name)
+		} else {
+			v.t.Errorf(m, v.name)
+		}
 	}
-	return ""
 }
