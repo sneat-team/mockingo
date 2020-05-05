@@ -43,8 +43,11 @@ import (
 )
 
 func TestMyFunc(t *testing.T) {
+  
   // mock helper to store history of calls with passed arguments
   mockedSomeFunc = mockingo.NewMockedFunc(t, "someFunc")
+  
+  // replace pointer to our dependency with a mock that uses  helper to store information about call
   someFunc = func(a, b string) string {
     mockedSomeFunc.Called(mockingo.NewArgument("a", a), mockingo.NewArgument("b", b))
     return a + b
