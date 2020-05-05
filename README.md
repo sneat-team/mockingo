@@ -38,12 +38,9 @@ func MyFunc(a, b string, repeat int) string {
 **my_func_test.go**
 ``` 
 import (
-  "fmt"
   "testing"
   "strconv"
 )
-
-var someFunc = mydependency.SomeFunc  // Our pointer to dependency so we can replace it in unit tests
 
 func TestMyFunc(t *testing.T) {
   // mock helper to store history of calls with passed arguments
@@ -53,13 +50,12 @@ func TestMyFunc(t *testing.T) {
     return a + b
   }
   
+  const expectedResult = "A1B1A2B2A3B3"
+    
   const numberOfCalls = 3
-  
-  // Call to function we test
-  result := MyFunc("A", "B", numberOfCalls)
-  
-  if expected := "A1B1A2B2A3B3" result != expected {
-    t.Errorf("Expected %v got %v", expected, result)
+  // Call to function we test and assert it result 
+  if result := MyFunc("A", "B", numberOfCalls); result != expectedResult {
+    t.Errorf("Expected result is '%v', actual result is '%v'", expectedResult, result)
   }
   
   mockedSomeFunc.AssertCalledAtLeastOnce(true) // True means is fatal if condition is not met
