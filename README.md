@@ -14,7 +14,8 @@ import (
   "strings"
 )
 
-var someFunc = mydependency.SomeFunc
+// Pointer to dependency function so we can replace it with a mock in unit tests
+var someFunc = mydependency.SomeFunc 
 
 // This func gets 2 strings
 // and repeatedely calls `mydependency.SomeFunc` as many times as requested
@@ -29,6 +30,8 @@ func MyFunc(a, b string, repeat int) string {
   s := make([]string, repeat)
   for i := 0; i < repeat; i++ {
     n := strconv.Itoa(i + 1)
+    
+    // Use pointer to the dependency instead of direct call so it can be replaced with a mock in unit tests
     s[i] = someFunc(a + n, b + n)
   }
   return strings.Join(s, "")
