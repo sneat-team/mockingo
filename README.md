@@ -10,6 +10,7 @@ Mock helpers for Go unit tests by https://sneat.team/
 ``` 
 import (
   "mydependency"
+  "strconv"
 )
 
 var someFunc = mydependency.SomeFunc
@@ -23,11 +24,13 @@ var someFunc = mydependency.SomeFunc
 // 
 //   MyFunc("a", "b", 3) => "a1b1a2b2a3b3"
 //
-func MyFunc(a, b string, repeat int) (s string) {
+func MyFunc(a, b string, repeat int) (string) {
+  s := make([]string, repeat)
   for i := 0; i < repeat; i++ {
-    s += someFunc(fmt.Sprintf("%v%v", a, i+1), fmt.Sprintf("%v%v", a, i+1))
+    n := strconv.Itoa(i + 1)
+    s[i] = someFunc(a + n, b + n)
   }
-  return s
+  return strings.Join(s, "")
 }
 ```
 
@@ -38,10 +41,10 @@ import (
   "testing"
 )
 
-var someFunc = mydependency.SomeFunc
+var someFunc = mydependency.SomeFunc  // Our pointer to dependency so we can replace it in unit tests
 
 func TestMyFunc(t *testing.T) {
-  // mocj helper to store history of calls
+  // mock helper to store history of calls with passed arguments
   mockedSomeFunc = mockingo.NewMockedFunc(t, "someFunc")
   someFunc = func(a, b string) string {
     mockedSomeFunc.Called(mockingo.NewArgument("a", a), mockingo.NewArgument("b", b))
@@ -49,6 +52,7 @@ func TestMyFunc(t *testing.T) {
   }
   
   const numberOfCalls = 3
+  
   // Call to function we test
   result := MyFunc("A", "B", numberOfCalls)
   
@@ -62,7 +66,7 @@ func TestMyFunc(t *testing.T) {
   // Let's verify arguments for each call
   for i, call := range mockedSomeFunc.Calls() {
     args := call.Args() // Get arguments passed to the mocked call
-    verifyArg := func(name, value string) { // Just a helper func to verify arguments
+    verifyArg := func(name, value string) { // Just a small helper func to verify arguments
       t.Helper()
       if expected := fmt.Sprintf("%v%v", value, i+1); args[name].(string) != expected {
         t.Errorf("Expected value  '%v' for '%v' argument for the call #%v, got: %v", expected, name, i, args[name])
