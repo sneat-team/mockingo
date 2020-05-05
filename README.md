@@ -11,6 +11,7 @@ Mock helpers for Go unit tests by https://sneat.team/
 import (
   "mydependency"
   "strconv"
+  "strings"
 )
 
 var someFunc = mydependency.SomeFunc
@@ -24,7 +25,7 @@ var someFunc = mydependency.SomeFunc
 // 
 //   MyFunc("a", "b", 3) => "a1b1a2b2a3b3"
 //
-func MyFunc(a, b string, repeat int) (string) {
+func MyFunc(a, b string, repeat int) string {
   s := make([]string, repeat)
   for i := 0; i < repeat; i++ {
     n := strconv.Itoa(i + 1)
@@ -39,6 +40,7 @@ func MyFunc(a, b string, repeat int) (string) {
 import (
   "fmt"
   "testing"
+  "strconv"
 )
 
 var someFunc = mydependency.SomeFunc  // Our pointer to dependency so we can replace it in unit tests
@@ -65,10 +67,11 @@ func TestMyFunc(t *testing.T) {
   
   // Let's verify arguments for each call
   for i, call := range mockedSomeFunc.Calls() {
+    n := strconv.Itoa(i+1)
     args := call.Args() // Get arguments passed to the mocked call
     verifyArg := func(name, value string) { // Just a small helper func to verify arguments
       t.Helper()
-      if expected := fmt.Sprintf("%v%v", value, i+1); args[name].(string) != expected {
+      if expected := value + n; args[name].(string) != expected {
         t.Errorf("Expected value  '%v' for '%v' argument for the call #%v, got: %v", expected, name, i, args[name])
       }
     }
